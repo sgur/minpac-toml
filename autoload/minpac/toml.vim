@@ -5,23 +5,28 @@ let s:Toml = vital#minpac_loader#new().import('Text.TOML')
 " Interface {{{1
 
 function! minpac#toml#load(path) abort
-  let repos = s:load_toml(a:path)
-  call s:add(repos)
+  let prefs = s:load_toml(a:path)
+  if !has_key(prefs, 'plugins')
+    echohl WarningMsg | echomsg "No plugins entry found." | echohl NONE | return
+    return
+  endif
+  call map(copy(prefs.plugins), 's:add(v:val)')
 endfunction
 
 " Internal {{{1
 
 function! s:load_toml(path) abort "{{{
-  let dict = s:Toml.parse_file(a:path)
-  return get(dict, 'plugins', [])
+  return s:Toml.parse_file(a:path)
 endfunction "}}}
 
-function! s:add(list) abort "{{{
-  for item in a:list
-    let config = item
+function! s:add(plugin) abort "{{{
+  let config = a:plugin
+  try
     let url = remove(config, 'url')
     call minpac#add(url, config)
-  endfor
+  catch /^Vim\%((\a\+)\)\=:E716/
+    echohl ErrorMsg | echomsg v:exception | echohl NONE
+  endtry
 endfunction "}}}
 
 " Initialization {{{1
