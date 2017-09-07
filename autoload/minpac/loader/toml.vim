@@ -4,7 +4,7 @@ let s:Toml = vital#minpac_loader#new().import('Text.TOML')
 
 " Interface {{{1
 
-function! minpac#toml#load(path) abort
+function! minpac#loader#toml#load(path) abort
   let prefs = s:load_toml(a:path)
   if !has_key(prefs, 'plugins')
     echohl WarningMsg | echomsg "No plugins entry found." | echohl NONE | return

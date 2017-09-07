@@ -4,7 +4,7 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac#json#load(path) abort
+function! minpac#loader#json#load(path) abort
   let list = s:load(a:path)
   call s:add(list)
 endfunction
