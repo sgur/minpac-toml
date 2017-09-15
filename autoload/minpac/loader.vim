@@ -31,9 +31,13 @@ finally
   endif
 endtry
 
+
 let s:nproc = has('win32')
       \ ? $NUMBER_OF_PROCESSORS
       \ : executable('nproc')
       \   ? systemlist('nproc')[0]
-      \   : 2
-" ↑ は `grep processor /proc/cpuinfo | wc -l` の結果でよさそう
+      \   : executable('sysctl')
+      \     ? systemlist('sysctl -n hw.ncpu')
+      \     : 4
+
+" macOS : sysctl -n machdep.cpu.cores_per_pacakge でもよさそう
