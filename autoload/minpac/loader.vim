@@ -4,7 +4,28 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac#loader#init() abort
+function! minpac#loader#load(path, fn_execute, ...) abort
+  call minpac#init({'jobs': minpac#loader#nproc()})
+
+  let filename = expand(a:path)
+
+  if !filereadable(filename)
+    return
+  endif
+
+  let ext = fnamemodify(filename, ':e')
+  if ext is? 'toml'
+    call minpac#loader#toml#load(filename)
+  endif
+  if ext is? 'json'
+    call minpac#loader#json#load(filename)
+  endif
+
+  let restart_on_changed = a:0 && type(a:1) == v:t_dict && get(a:1, 'restart', 0)
+  call call(a:fn_execute, [
+        \ '',
+        \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {}
+        \ ])
 endfunction
 
 function! minpac#loader#nproc() abort
@@ -29,7 +50,7 @@ endfunction
 
 " Internal {{{1
 
-function! s:convert_hook_from(str) abort
+function! s:convert_hook_from() abort "{{{
   try
     " Assumed as an user functions
     return function(a:str)
@@ -42,7 +63,14 @@ function! s:convert_hook_from(str) abort
       return a:str
     endif
   endtry
-endfunction
+endfunction "}}}
+
+function! s:hook_restart_on_update_finished(hooktype, updated, installed) abort "{{{
+  if a:updated == 0 && a:installed == 0 | return | endif
+  if get(g:, 'loaded_restart', 0) && exists(':Restart') == 2
+    Restart
+  endif
+endfunction "}}}
 
 
 " Initialization {{{1
