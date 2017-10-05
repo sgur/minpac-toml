@@ -12,20 +12,22 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 
-function! s:load(filename, fn_execute) abort "{{{
+function! s:load(path, fn_execute) abort "{{{
   call minpac#loader#init()
   call minpac#init({'jobs': minpac#loader#nproc()})
 
-  if !filereadable(a:filename)
+  let filename = expand(a:path)
+
+  if !filereadable(filename)
     return
   endif
 
-  let ext = fnamemodify(a:filename, ':e')
+  let ext = fnamemodify(filename, ':e')
   if ext is? 'toml'
-    call minpac#loader#toml#load(a:filename)
+    call minpac#loader#toml#load(filename)
   endif
   if ext is? 'json'
-    call minpac#loader#json#load(a:filename)
+    call minpac#loader#json#load(filename)
   endif
 
   call call(a:fn_execute, [])
