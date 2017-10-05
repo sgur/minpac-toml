@@ -12,7 +12,7 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 
-function! s:load(path, fn_execute) abort "{{{
+function! s:load(path, fn_execute, ...) abort "{{{
   call minpac#loader#init()
   call minpac#init({'jobs': minpac#loader#nproc()})
 
@@ -30,13 +30,24 @@ function! s:load(path, fn_execute) abort "{{{
     call minpac#loader#json#load(filename)
   endif
 
-  call call(a:fn_execute, [])
+  let restart_on_changed = a:0 && type(a:1) == v:t_dict && get(a:1, 'restart', 0)
+  call call(a:fn_execute, [
+        \ '',
+        \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {}
+        \ ])
+endfunction "}}}
+
+function! s:hook_restart_on_update_finished(hooktype, updated, installed) abort "{{{
+  if a:updated == 0 && a:installed == 0 | return | endif
+  if get(g:, 'loaded_restart', 0) && exists(':Restart') == 2
+    Restart
+  endif
 endfunction "}}}
 
 
 " let s:filename = expand('<sfile>:p:h:h') . '/pack/minpac.toml'
-command! -nargs=1 -complete=file MinpacUpdate
-      \ call s:load(<q-args>, function('minpac#update'))
+command! -bang -nargs=1 -complete=file MinpacUpdate
+      \ call s:load(<q-args>, function('minpac#update'), {'restart': <bang>0})
 
 command! -nargs=1 -complete=file MinpacClean
       \ call s:load(<q-args>, function('minpac#clean'))

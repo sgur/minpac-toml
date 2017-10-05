@@ -10,28 +10,13 @@ function! minpac#loader#toml#load(path) abort
     echohl WarningMsg | echomsg "No plugins entry found." | echohl NONE | return
     return
   endif
-  call map(copy(prefs.plugins), 's:add(v:val)')
+  call map(copy(prefs.plugins), 'minpac#loader#add(v:val)')
 endfunction
 
 " Internal {{{1
 
 function! s:load_toml(path) abort "{{{
   return s:Toml.parse_file(a:path)
-endfunction "}}}
-
-function! s:add(plugin) abort "{{{
-  let config = a:plugin
-  " Prerocess config.do hooks
-  if has_key(config, 'do') && type(config.do) == v:t_string
-    let config.do = minpac#loader#misc#hooks#convert_from(config.do)
-  endif
-
-  try
-    let url = remove(config, 'url')
-    call minpac#add(url, config)
-  catch /^Vim\%((\a\+)\)\=:E716/
-    echohl ErrorMsg | echomsg v:exception | echohl NONE
-  endtry
 endfunction "}}}
 
 " Initialization {{{1
