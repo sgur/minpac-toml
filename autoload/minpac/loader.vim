@@ -50,7 +50,7 @@ endfunction
 
 " Internal {{{1
 
-function! s:convert_hook_from() abort "{{{
+function! s:convert_hook_from(str) abort "{{{
   try
     " Assumed as an user functions
     return function(a:str)
@@ -95,7 +95,7 @@ let s:nproc = has('win32')
       \ : executable('nproc')
       \   ? systemlist('nproc')[0]
       \   : executable('sysctl')
-      \     ? systemlist('sysctl -n hw.ncpu')
+      \     ? systemlist('sysctl -n hw.ncpu')[0]
       \     : 4
 
 " macOS : sysctl -n machdep.cpu.cores_per_pacakge でもよさそう
