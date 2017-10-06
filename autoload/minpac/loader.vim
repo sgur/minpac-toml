@@ -66,7 +66,9 @@ function! s:convert_hook_from(str) abort "{{{
 endfunction "}}}
 
 function! s:hook_restart_on_update_finished(hooktype, updated, installed) abort "{{{
-  if a:updated == 0 && a:installed == 0 | return | endif
+  if !(a:updated + a:installed)
+    return
+  endif
   if get(g:, 'loaded_restart', 0) && exists(':Restart') == 2
     Restart
   endif
