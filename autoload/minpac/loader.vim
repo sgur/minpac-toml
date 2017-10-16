@@ -53,6 +53,9 @@ endfunction
 
 function! s:convert_hook_from(str) abort "{{{
   try
+    if a:str =~# 'function(.\+)'
+      return eval(a:str)
+    endif
     " Assumed as an user functions
     return function(a:str)
   catch /^Vim\%((\a\+)\)\=:E\(15\|121\|129\|700\)/
