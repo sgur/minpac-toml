@@ -10,6 +10,7 @@ function! minpac#loader#load(path, fn_execute, ...) abort
   let filename = expand(a:path)
 
   if !filereadable(filename)
+    echohl WarningMsg | echomsg 'Unable to open:' a:path | echohl None
     return
   endif
 
