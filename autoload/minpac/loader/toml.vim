@@ -7,10 +7,10 @@ let s:Toml = vital#minpac_loader#new().import('Text.TOML')
 function! minpac#loader#toml#load(path) abort
   let prefs = s:load_toml(a:path)
   if !has_key(prefs, 'plugins')
-    echohl WarningMsg | echomsg "No plugins entry found." | echohl NONE | return
+    echohl WarningMsg | echomsg "[minpac-loader] No plugins entry found." | echohl NONE | return
     return
   endif
-  call map(copy(prefs.plugins), 'minpac#loader#add(v:val)')
+  return prefs
 endfunction
 
 " Internal {{{1
