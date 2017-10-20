@@ -4,7 +4,47 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac#loader#load(path, fn_execute, ...) abort
+function! minpac#loader#cli(force_restart, ...) abort
+  let args = uniq(sort(copy(a:000)))
+  let cmd = {}
+  for op in ['clean', 'update']
+    let idx = index(args, '-' . op)
+    if idx > -1
+      let cmd[op] = 1
+      call remove(args, idx)
+    endif
+  endfor
+
+  let path = get(filter(map(args, 'expand(v:val)'), 'filereadable(v:val)'), 0, '')
+  if empty(path)
+    echohl WarningMsg | echomsg '[minpac-loader] No file specified' | echohl None
+    return
+  endif
+
+  let fns = []
+  if has_key(cmd, 'clean')
+    let fns += [{'fn': function('minpac#clean')}]
+  endif
+  if has_key(cmd, 'update')
+    let fns += [{'fn': function('minpac#update'), 'restart': a:force_restart}]
+  endif
+  if empty(fns)
+    echohl WarningMsg | echomsg '[minpac-loader] No command specified' | echohl None
+    return
+  endif
+  call minpac#loader#load(path, fns)
+endfunction
+
+function! minpac#loader#complete(arglead, cmdline, cursorpos) abort
+  let args = split(a:cmdline, '\s\+')[1:]
+  let ret = filter(['-clean', '-update'], 'index(args, v:val) == -1')
+  if a:arglead[0] isnot# '-'
+    let ret += getcompletion(a:arglead, 'file')
+  endif
+  return filter(ret, 'stridx(v:val, a:arglead) > -1 ')
+endfunction
+
+function! minpac#loader#load(path, cmd_list) abort
   call minpac#init({'jobs': minpac#loader#nproc()})
 
   let filename = expand(a:path)
@@ -33,11 +73,14 @@ function! minpac#loader#load(path, fn_execute, ...) abort
         \   '!empty(v:val)'),
         \ 'minpac#add(v:val[0], v:val[1])')
 
-  let restart_on_changed = a:0 && type(a:1) == v:t_dict && get(a:1, 'restart', 0)
-  call call(a:fn_execute, [
-        \ '',
-        \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {}
-        \ ])
+  for cmd in a:cmd_list
+    let restart_on_changed = get(cmd, 'restart', 0)
+    call call(cmd.fn, [
+          \ '',
+          \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {}
+          \ ])
+  endfor
+
 endfunction
 
 function! minpac#loader#nproc() abort
