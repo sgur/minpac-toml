@@ -37,11 +37,11 @@ endfunction
 
 function! minpac#loader#complete(arglead, cmdline, cursorpos) abort
   let args = split(a:cmdline, '\s\+')[1:]
-  let ret = filter(['-clean', '-update'], 'index(args, v:val) == -1')
+  let ret = filter(['-clean', '-update'], 'index(args, v:val) != 0')
   if a:arglead[0] isnot# '-'
     let ret += getcompletion(a:arglead, 'file')
   endif
-  return filter(ret, 'stridx(v:val, a:arglead) > -1 ')
+  return ret
 endfunction
 
 function! minpac#loader#load(path, cmd_list) abort
