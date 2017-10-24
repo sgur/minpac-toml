@@ -94,7 +94,8 @@ function! s:check(plugin) abort "{{{
   let config = a:plugin
   " Prerocess config.do hooks
   if has_key(config, 'do') && type(config.do) == v:t_string
-    let config.do = s:convert_hook_from(config.do)
+    let hook = substitute(config.do, "\n", '', 'g')
+    let config.do = s:convert_hook_from(hook)
   endif
 
   try
