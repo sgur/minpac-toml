@@ -37,11 +37,10 @@ endfunction
 
 function! minpac#loader#complete(arglead, cmdline, cursorpos) abort
   let args = split(a:cmdline, '\s\+')[1:]
-  let ret = filter(['-clean', '-update'], 'index(args, v:val) != 0')
-  if a:arglead[0] isnot# '-'
-    let ret += getcompletion(a:arglead, 'file')
-  endif
-  return ret
+  let cmds = empty(a:arglead) || a:arglead[0] is# '-'
+        \ ? filter(['-clean', '-update'], 'index(args, v:val) == -1')
+        \ : []
+  return cmds + getcompletion(a:arglead, 'file')
 endfunction
 
 function! minpac#loader#load(path, cmd_list) abort
@@ -114,7 +113,7 @@ function! s:convert_hook_from(str) abort "{{{
     endif
     " Assumed as an user functions
     return function(a:str)
-  catch /^Vim\%((\a\+)\)\=:E\(15\|121\|129\|700\)/
+  catch /^Vim\%((\a\+)\)\=:E\(15\|121\|129\|475\|700\)/
     if a:str =~# '^{.\+}$'
       " as a lambada
       return eval(a:str)
