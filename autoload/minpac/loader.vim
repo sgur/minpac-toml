@@ -109,18 +109,18 @@ endfunction "}}}
 function! s:convert_hook_from(str) abort "{{{
   try
     if a:str =~# 'function(.\+)'
+      " as a funcref
       return eval(a:str)
     endif
-    " Assumed as an user functions
-    return function(a:str)
-  catch /^Vim\%((\a\+)\)\=:E\(15\|121\|129\|475\|700\)/
     if a:str =~# '^{.\+}$'
       " as a lambada
       return eval(a:str)
-    else
-      " as an ex-command
-      return a:str
     endif
+    " Assumed as a function name
+    return function(a:str)
+  catch /^Vim\%((\a\+)\)\=:E\(15\|121\|129\|475\|700\)/
+    " as an ex-command
+    return a:str
   endtry
 endfunction "}}}
 
