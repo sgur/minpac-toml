@@ -74,10 +74,8 @@ function! minpac#loader#load(path, cmd_list) abort
 
   for cmd in a:cmd_list
     let restart_on_changed = get(cmd, 'restart', 0)
-    call call(cmd.fn, [
-          \ '',
-          \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {}
-          \ ])
+    call call(cmd.fn, [],
+          \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {})
   endfor
 
 endfunction
