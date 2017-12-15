@@ -4,7 +4,15 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac#loader#cli(force_restart, ...) abort
+function! minpac#loader#cli(force_restart, visual, ...) abort
+  if a:visual > 0
+    let path = fnamemodify(tempname(), 'r') . '.toml'
+    call writefile(getline(line("'<"), line("'>")), path)
+    let fns = [{'fn': function('minpac#update')}]
+    let fns += [{'fn': {-> delete(path)}}]
+    call minpac#loader#load(path, fns)
+    return
+  endif
   let args = uniq(sort(copy(a:000)))
   let cmd = {}
   for op in ['clean', 'update']
@@ -14,10 +22,14 @@ function! minpac#loader#cli(force_restart, ...) abort
       call remove(args, idx)
     endif
   endfor
+  if empty(cmd)
+    echoerr '[minpac-loader] Arguments (-update, -clean) are required.'
+    return
+  endif
 
   let path = get(filter(map(args, 'expand(v:val)'), 'filereadable(v:val)'), 0, '')
   if empty(path)
-    echohl WarningMsg | echomsg '[minpac-loader] No file specified' | echohl None
+    echoerr '[minpac-loader] pacakge list file (*.toml, *.json) required.'
     return
   endif
 
@@ -29,7 +41,7 @@ function! minpac#loader#cli(force_restart, ...) abort
     let fns += [{'fn': function('minpac#update'), 'restart': a:force_restart}]
   endif
   if empty(fns)
-    echohl WarningMsg | echomsg '[minpac-loader] No command specified' | echohl None
+    echoerr '[minpac-loader] No command specified'
     return
   endif
   call minpac#loader#load(path, fns)
@@ -46,10 +58,10 @@ endfunction
 function! minpac#loader#load(path, cmd_list) abort
   call minpac#init({'jobs': minpac#loader#nproc()})
 
-  let filename = expand(a:path)
+  let filename = expand(a:path, 1)
 
   if !filereadable(filename)
-    echohl WarningMsg | echomsg '[minpac-loader] Unable to open:' a:path | echohl None
+    echoerr '[minpac-loader] Unable to open:' a:path
     return
   endif
 
@@ -61,8 +73,8 @@ function! minpac#loader#load(path, cmd_list) abort
   if ext is? 'json'
     let prefs = minpac#loader#json#load(filename)
   endif
-  if empty(prefs) || empty(get(prefs, 'plugins', []))
-    echohl WarningMsg | echomsg "[minpac-loader] no plugin entries found" | echohl None
+  if empty(get(prefs, 'plugins', []))
+    echoerr '[minpac-loader] no plugin entries found'
     return
   endif
 

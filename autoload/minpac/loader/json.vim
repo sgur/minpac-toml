@@ -7,8 +7,7 @@ scriptencoding utf-8
 function! minpac#loader#json#load(path) abort
   let prefs = s:load_json(a:path)
   if !has_key(prefs, 'plugins')
-    echohl WarningMsg | echomsg "[minpac-loader] No plugins entry found." | echohl NONE | return
-    return
+    return {}
   endif
   call map(prefs.plugins, 's:normalize(v:val)')
   return prefs

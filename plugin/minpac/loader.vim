@@ -12,9 +12,8 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 
-" let s:filename = expand('<sfile>:p:h:h') . '/pack/minpac.toml'
-command! -bang -nargs=+ -complete=customlist,minpac#loader#complete MinpacCli
-      \ call minpac#loader#cli(<bang>0, <f-args>)
+command! -bang -nargs=* -count=0 -complete=customlist,minpac#loader#complete MinpacLoader
+      \ call minpac#loader#cli(<bang>0, <count>, <f-args>)
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
