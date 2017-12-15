@@ -21,7 +21,7 @@ call `minpac#loader#json#load()` or `minpac#loader#toml#load()` for the appropri
 
 ### Commands
 
-Execute `MinpackUpdate <filename>` or `MinpackClean <filename>` where `filename` is a toml or json file.
+Execute `MinpacLoader {-update,-clean} <filename>` where `filename` is a toml or json file.
 
 Install
 -------
