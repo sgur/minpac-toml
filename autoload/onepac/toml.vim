@@ -1,10 +1,10 @@
 scriptencoding utf-8
 
-let s:Toml = vital#minpac_loader#new().import('Text.TOML')
+let s:Toml = vital#onepac#new().import('Text.TOML')
 
 " Interface {{{1
 
-function! minpac#loader#toml#load(path) abort
+function! onepac#toml#load(path) abort
   let prefs = s:load_toml(a:path)
   if !has_key(prefs, 'plugins')
     return {}

@@ -4,13 +4,13 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac#loader#cli(force_restart, visual, ...) abort
+function! onepac#cli(force_restart, visual, ...) abort
   if a:visual > 0
     let path = fnamemodify(tempname(), 'r') . '.toml'
     call writefile(getline(line("'<"), line("'>")), path)
     let fns = [{'fn': function('minpac#update')}]
     let fns += [{'fn': {-> delete(path)}}]
-    call minpac#loader#load(path, fns)
+    call onepac#load(path, fns)
     return
   endif
   let args = uniq(sort(copy(a:000)))
@@ -23,13 +23,13 @@ function! minpac#loader#cli(force_restart, visual, ...) abort
     endif
   endfor
   if empty(cmd)
-    echoerr '[minpac-loader] Arguments (-update, -clean) are required.'
+    echoerr '[onepac] Arguments (-update, -clean) are required.'
     return
   endif
 
   let path = get(filter(map(args, 'expand(v:val)'), 'filereadable(v:val)'), 0, '')
   if empty(path)
-    echoerr '[minpac-loader] pacakge list file (*.toml, *.json) required.'
+    echoerr '[onepac] pacakge list file (*.toml, *.json) required.'
     return
   endif
 
@@ -41,13 +41,13 @@ function! minpac#loader#cli(force_restart, visual, ...) abort
     let fns += [{'fn': function('minpac#update'), 'restart': a:force_restart}]
   endif
   if empty(fns)
-    echoerr '[minpac-loader] No command specified'
+    echoerr '[onepac] No command specified'
     return
   endif
-  call minpac#loader#load(path, fns)
+  call onepac#load(path, fns)
 endfunction
 
-function! minpac#loader#complete(arglead, cmdline, cursorpos) abort
+function! onepac#complete(arglead, cmdline, cursorpos) abort
   let args = split(a:cmdline, '\s\+')[1:]
   let cmds = empty(a:arglead) || a:arglead[0] is# '-'
         \ ? filter(['-clean', '-update'], 'index(args, v:val) == -1')
@@ -55,32 +55,32 @@ function! minpac#loader#complete(arglead, cmdline, cursorpos) abort
   return cmds + getcompletion(a:arglead, 'file')
 endfunction
 
-function! minpac#loader#load(path, cmd_list) abort
-  call minpac#init({'jobs': minpac#loader#nproc()})
+function! onepac#load(path, cmd_list) abort
+  call minpac#init({'jobs': onepac#nproc()})
 
   let filename = expand(a:path, 1)
 
   if !filereadable(filename)
-    echoerr '[minpac-loader] Unable to open:' a:path
+    echoerr '[onepac] Unable to open:' a:path
     return
   endif
 
   let ext = fnamemodify(filename, ':e')
   let prefs = {}
   if ext is? 'toml'
-    let prefs = minpac#loader#toml#load(filename)
+    let prefs = onepac#toml#load(filename)
   endif
   if ext is? 'json'
-    let prefs = minpac#loader#json#load(filename)
+    let prefs = onepac#json#load(filename)
   endif
   if empty(get(prefs, 'plugins', []))
-    echoerr '[minpac-loader] no plugin entries found'
+    echoerr '[onepac] no plugin entries found'
     return
   endif
 
   call map(
         \ filter(
-        \   map(copy(prefs.plugins), 's:check(v:val)'),
+        \   map(copy(prefs.plugins), 's:parse(v:val)'),
         \   '!empty(v:val)'),
         \ 'minpac#add(v:val[0], v:val[1])')
 
@@ -92,19 +92,19 @@ function! minpac#loader#load(path, cmd_list) abort
 
 endfunction
 
-function! minpac#loader#nproc() abort
+function! onepac#nproc() abort
   return s:nproc
 endfunction
 
 
 " Internal {{{1
 
-function! s:check(plugin) abort "{{{
+function! s:parse(plugin) abort "{{{
   let config = a:plugin
   " Prerocess config.do hooks
   if has_key(config, 'do') && type(config.do) == v:t_string
     let hook = substitute(config.do, "\n", '', 'g')
-    let config.do = s:convert_hook_from(hook)
+    let config.do = s:validate_hook(hook)
   endif
 
   try
@@ -116,7 +116,7 @@ function! s:check(plugin) abort "{{{
   return []
 endfunction "}}}
 
-function! s:convert_hook_from(str) abort "{{{
+function! s:validate_hook(str) abort "{{{
   try
     if a:str =~# 'function(.\+)'
       " as a funcref

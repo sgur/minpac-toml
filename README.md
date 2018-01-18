@@ -12,6 +12,7 @@ Requirement
 
 * Vim8 (`+job` and `+packages` required)
 * [minpac](https://github.com/k-takata/minpac)
+* [restart.vim](https://github.com/tyru/restart.vim) (Optional)
 
 Usage
 -----
@@ -19,6 +20,8 @@ Usage
 ### Commands
 
 Execute `Onepac {-update,-clean} <filename>` where `filename` is a toml or json file.
+
+`Onepac` command with `!`(bang) restarts Vim after update. It use [restart.vim](https://github.com/tyru/restart.vim).
 
 Install
 -------

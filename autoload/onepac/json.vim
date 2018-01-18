@@ -4,7 +4,7 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac#loader#json#load(path) abort
+function! minpac#json#load(path) abort
   let prefs = s:load_json(a:path)
   if !has_key(prefs, 'plugins')
     return {}

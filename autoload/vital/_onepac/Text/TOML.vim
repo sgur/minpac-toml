@@ -4,7 +4,7 @@
 function! s:_SID() abort
   return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze__SID$')
 endfunction
-execute join(['function! vital#_minpac_loader#Text#TOML#import() abort', printf("return map({'parse': '', 'parse_file': ''}, \"vital#_minpac_loader#function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
+execute join(['function! vital#_onepac#Text#TOML#import() abort', printf("return map({'parse': '', 'parse_file': ''}, \"vital#_onepac#function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
 delfunction s:_SID
 " ___vital___
 let s:save_cpo = &cpo
