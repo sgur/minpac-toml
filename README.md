@@ -1,35 +1,32 @@
-minpac-loader: Json and Toml loader for [minpac](https://github.com/k-takata/minpac)
+Onepac: Install a series of vim packages using [minpac](https://github.com/k-takata/minpac)
 =================
 
 Description
 -----------
 
-Minpac-loader imports a json or toml file and calls minpac#add() for each entries.
+Onepac imports packages from a json or toml file and calls `minpac#add()` for each entries.
+And also call `minpac#install()` when the `-update` command specified.
 
 Requirement
 -----------
 
-* Vim8
-* minpac
+* Vim8 (`+job` and `+packages` required)
+* [minpac](https://github.com/k-takata/minpac)
 
 Usage
 -----
 
-### Functions
-
-call `minpac#loader#json#load()` or `minpac#loader#toml#load()` for the appropriate format.
-
 ### Commands
 
-Execute `MinpacLoader {-update,-clean} <filename>` where `filename` is a toml or json file.
+Execute `Onepac {-update,-clean} <filename>` where `filename` is a toml or json file.
 
 Install
 -------
 
 Locate under the package directoy:
 
-* `~/.vim/pack/default/start/vim-minpac-loader`
-* `~/.vim/pack/default/opt/vim-minpac-loader` and execute `packadd vim-minpac-loader`
+* `~/.vim/pack/default/start/vim-onepac`
+* `~/.vim/pack/default/opt/vim-onepac` and execute `packadd vim-onepac`
 
 TOML Format
 -----------
