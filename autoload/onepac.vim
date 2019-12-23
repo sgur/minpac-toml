@@ -23,8 +23,7 @@ function! onepac#cli(force_restart, visual, ...) abort
     endif
   endfor
   if empty(cmd)
-    echoerr '[onepac] Arguments (-update, -clean) are required.'
-    return
+    let cmd['update'] = 1 " Update as default
   endif
 
   let path = get(filter(map(args, 'expand(v:val)'), 'filereadable(v:val)'), 0, '')
