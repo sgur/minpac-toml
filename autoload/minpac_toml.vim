@@ -4,58 +4,11 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! minpac_toml#cli(force_restart, visual, ...) abort
-  if a:visual > 0
-    let path = fnamemodify(tempname(), 'r') . '.toml'
-    call writefile(getline(line("'<"), line("'>")), path)
-    let fns = [{'fn': function('minpac#update')}]
-    let fns += [{'fn': {-> delete(path)}}]
-    call minpac_toml#load(path, fns)
+function! minpac_toml#load(path) abort
+  if !(exists('g:minpac#opt') && exists('g:minpac#pluglist'))
+    echoerr '[minpac-toml] Call minpac#init() first'
     return
   endif
-  let args = uniq(sort(copy(a:000)))
-  let cmd = {}
-  for op in ['clean', 'update']
-    let idx = index(args, '-' . op)
-    if idx > -1
-      let cmd[op] = 1
-      call remove(args, idx)
-    endif
-  endfor
-  if empty(cmd)
-    let cmd['update'] = 1 " Update as default
-  endif
-
-  let path = get(filter(map(args, 'expand(v:val)'), 'filereadable(v:val)'), 0, '')
-  if empty(path)
-    echoerr '[minpac_toml] pacakge list file (*.toml) required.'
-    return
-  endif
-
-  let fns = []
-  if has_key(cmd, 'clean')
-    let fns += [{'fn': function('minpac#clean')}]
-  endif
-  if has_key(cmd, 'update')
-    let fns += [{'fn': function('minpac#update'), 'restart': a:force_restart}]
-  endif
-  if empty(fns)
-    echoerr '[minpac_toml] No command specified'
-    return
-  endif
-  call minpac_toml#load(path, fns)
-endfunction
-
-function! minpac_toml#complete(arglead, cmdline, cursorpos) abort
-  let args = split(a:cmdline, '\s\+')[1:]
-  let cmds = empty(a:arglead) || a:arglead[0] is# '-'
-        \ ? filter(['-clean', '-update'], 'index(args, v:val) == -1')
-        \ : []
-  return cmds + getcompletion(a:arglead, 'file')
-endfunction
-
-function! minpac_toml#load(path, cmd_list) abort
-  call minpac#init({'jobs': minpac_toml#nproc()})
 
   let filename = expand(a:path, 1)
 
@@ -69,31 +22,37 @@ function! minpac_toml#load(path, cmd_list) abort
   if ext is? 'toml'
     let prefs = minpac_toml#toml#load(filename)
   endif
-  if empty(get(prefs, 'plugins', []))
+  if empty(get(prefs, 'plugin', []))
     echoerr '[minpac_toml] no plugin entries found'
     return
   endif
 
   call map(
         \ filter(
-        \   map(copy(prefs.plugins), 's:parse(v:val)'),
+        \   map(copy(prefs.plugin), 's:parse(v:val)'),
         \   '!empty(v:val)'),
         \ 'minpac#add(v:val[0], v:val[1])')
-
-  for cmd in a:cmd_list
-    let restart_on_changed = get(cmd, 'restart', 0)
-    call call(cmd.fn, [],
-          \ restart_on_changed ? {'do': function('s:hook_restart_on_update_finished')} : {})
-  endfor
-
 endfunction
 
-function! minpac_toml#nproc() abort
-  return s:nproc
+function! minpac_toml#wrap(...) abort
+  let arg = a:0 ? a:1 : {}
+  return extend({'jobs': s:nproc()}, arg, 'force')
 endfunction
-
 
 " Internal {{{1
+
+function! s:nproc() abort
+  return str2nr(
+        \ has('win32')
+        \ ? $NUMBER_OF_PROCESSORS
+        \ : executable('nproc')
+        \   ? systemlist('nproc')[0]
+        \   : executable('sysctl')
+        \     ? systemlist('sysctl -n hw.ncpu')[0]
+        \     : 8)
+
+  " macOS : sysctl -n machdep.cpu.cores_per_pacakge でもよさそう
+endfunction
 
 function! s:parse(plugin) abort "{{{
   let config = a:plugin
@@ -131,21 +90,8 @@ function! s:validate_hook(str) abort "{{{
   endtry
 endfunction "}}}
 
-function! s:hook_restart_on_update_finished(hooktype, updated, installed) abort "{{{
-  if !(a:updated + a:installed)
-    return
-  endif
-  if get(g:, 'loaded_restart', 0) && exists(':Restart') == 2
-    Restart
-  endif
-endfunction "}}}
-
 
 " Initialization {{{1
-
-
-
-" 1}}}
 
 try
   packadd minpac
@@ -157,13 +103,4 @@ finally
   endif
 endtry
 
-
-let s:nproc = has('win32')
-      \ ? $NUMBER_OF_PROCESSORS
-      \ : executable('nproc')
-      \   ? systemlist('nproc')[0]
-      \   : executable('sysctl')
-      \     ? systemlist('sysctl -n hw.ncpu')[0]
-      \     : 4
-
-" macOS : sysctl -n machdep.cpu.cores_per_pacakge でもよさそう
+" 1}}}

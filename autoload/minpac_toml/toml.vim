@@ -6,7 +6,7 @@ let s:Toml = vital#minpac_toml#new().import('Text.TOML')
 
 function! minpac_toml#toml#load(path) abort
   let prefs = s:load_toml(a:path)
-  if !has_key(prefs, 'plugins')
+  if !has_key(prefs, 'plugin')
     return {}
   endif
   return prefs
