@@ -117,16 +117,17 @@ endfunction "}}}
 
 function! s:validate_hook(str) abort "{{{
   try
-    if a:str =~# 'function(.\+)'
-      " as a funcref
+    if a:str =~# '^{.*->.\+}$'
+      " eval as a lambada
       return eval(a:str)
     endif
-    if a:str =~# '^{.\+}$'
-      " as a lambada
-      return eval(a:str)
+
+    let funcname = a:str
+    if funcname =~# 'function([''"].\+[''"])'
+      let funcname = matchstr(a:str, 'function([''"]\zs.\+\ze[''"])')
     endif
     " Assumed as a function name
-    return function(a:str)
+    return function(funcname)
   catch /^Vim\%((\a\+)\)\=:E\(15\|121\|129\|475\|700\)/
     " as an ex-command
     return a:str
