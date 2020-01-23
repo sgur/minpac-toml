@@ -4,13 +4,13 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! onepac#cli(force_restart, visual, ...) abort
+function! minpac_toml#cli(force_restart, visual, ...) abort
   if a:visual > 0
     let path = fnamemodify(tempname(), 'r') . '.toml'
     call writefile(getline(line("'<"), line("'>")), path)
     let fns = [{'fn': function('minpac#update')}]
     let fns += [{'fn': {-> delete(path)}}]
-    call onepac#load(path, fns)
+    call minpac_toml#load(path, fns)
     return
   endif
   let args = uniq(sort(copy(a:000)))
@@ -28,7 +28,7 @@ function! onepac#cli(force_restart, visual, ...) abort
 
   let path = get(filter(map(args, 'expand(v:val)'), 'filereadable(v:val)'), 0, '')
   if empty(path)
-    echoerr '[onepac] pacakge list file (*.toml, *.json) required.'
+    echoerr '[minpac_toml] pacakge list file (*.toml) required.'
     return
   endif
 
@@ -40,13 +40,13 @@ function! onepac#cli(force_restart, visual, ...) abort
     let fns += [{'fn': function('minpac#update'), 'restart': a:force_restart}]
   endif
   if empty(fns)
-    echoerr '[onepac] No command specified'
+    echoerr '[minpac_toml] No command specified'
     return
   endif
-  call onepac#load(path, fns)
+  call minpac_toml#load(path, fns)
 endfunction
 
-function! onepac#complete(arglead, cmdline, cursorpos) abort
+function! minpac_toml#complete(arglead, cmdline, cursorpos) abort
   let args = split(a:cmdline, '\s\+')[1:]
   let cmds = empty(a:arglead) || a:arglead[0] is# '-'
         \ ? filter(['-clean', '-update'], 'index(args, v:val) == -1')
@@ -54,26 +54,23 @@ function! onepac#complete(arglead, cmdline, cursorpos) abort
   return cmds + getcompletion(a:arglead, 'file')
 endfunction
 
-function! onepac#load(path, cmd_list) abort
-  call minpac#init({'jobs': onepac#nproc()})
+function! minpac_toml#load(path, cmd_list) abort
+  call minpac#init({'jobs': minpac_toml#nproc()})
 
   let filename = expand(a:path, 1)
 
   if !filereadable(filename)
-    echoerr '[onepac] Unable to open:' a:path
+    echoerr '[minpac_toml] Unable to open:' a:path
     return
   endif
 
   let ext = fnamemodify(filename, ':e')
   let prefs = {}
   if ext is? 'toml'
-    let prefs = onepac#toml#load(filename)
-  endif
-  if ext is? 'json'
-    let prefs = onepac#json#load(filename)
+    let prefs = minpac_toml#toml#load(filename)
   endif
   if empty(get(prefs, 'plugins', []))
-    echoerr '[onepac] no plugin entries found'
+    echoerr '[minpac_toml] no plugin entries found'
     return
   endif
 
@@ -91,7 +88,7 @@ function! onepac#load(path, cmd_list) abort
 
 endfunction
 
-function! onepac#nproc() abort
+function! minpac_toml#nproc() abort
   return s:nproc
 endfunction
 

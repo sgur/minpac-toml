@@ -1,10 +1,10 @@
-Onepac: Install a series of vim packages using [minpac](https://github.com/k-takata/minpac)
+Minpac-toml: Install a series of vim packages using [minpac](https://github.com/k-takata/minpac)
 =================
 
 Description
 -----------
 
-Onepac imports packages from a json or toml file and calls `minpac#add()` for each entries.
+minpac-toml imports packages from a toml file and calls `minpac#add()` for each entries.
 And also call `minpac#install()` when the `-update` command specified.
 
 Requirement
@@ -19,17 +19,17 @@ Usage
 
 ### Commands
 
-Execute `Onepac {-update,-clean} <filename>` where `filename` is a toml or json file.
+Execute `MinpacToml {-update,-clean} <filename>` where `filename` is a toml file.
 
-`Onepac` command with `!`(bang) restarts Vim after update. It use [restart.vim](https://github.com/tyru/restart.vim).
+`MinpacToml` command with `!`(bang) restarts Vim after update. It use [restart.vim](https://github.com/tyru/restart.vim).
 
 Install
 -------
 
 Locate under the package directoy:
 
-* `~/.vim/pack/default/start/vim-onepac`
-* `~/.vim/pack/default/opt/vim-onepac` and execute `packadd vim-onepac`
+* `~/.vim/pack/default/start/minpac-toml`
+* `~/.vim/pack/default/opt/minpac-toml` and execute `packadd minpac-toml`
 
 TOML Format
 -----------
