@@ -1,49 +1,49 @@
-[[plugins]]
+[[plugin]]
 url = "w0rp/ale"
 type = "opt"
 
-[[plugins]]
+[[plugin]]
 url = "alessandroyorba/sierra"
 type = "opt"
 
-[[plugins]]
+[[plugin]]
 url = "mattn/emmet-vim"
 type = "opt"
 
-[[plugins]]
+[[plugin]]
 url = "dracula/vim"
 name = "dracula-vim"
 type = "opt"
 
-[[plugins]]
+[[plugin]]
 url = "rhysd/vim-gfm-syntax"
 type = "opt"
 
-[[plugins]]
+[[plugin]]
 url = "AndrewRadev/inline_edit.vim"
 
-[[plugins]]
+[[plugin]]
 url = "kana/vim-altr"
 
-[[plugins]]
+[[plugin]]
 url = "kana/vim-niceblock"
 
-[[plugins]]
+[[plugin]]
 url = "mattn/sonictemplate-vim"
 
-[[plugins]]
+[[plugin]]
 url = "mattn/webapi-vim"
 
-[[plugins]]
+[[plugin]]
 url = "mhinz/vim-hugefile"
 
-[[plugins]]
+[[plugin]]
 url = "sgur/vim-editorconfig"
 depth = 9999
 
-[[plugins]]
+[[plugin]]
 url = "sjl/gundo.vim"
 
-[[plugins]]
+[[plugin]]
 url = "thinca/vim-ambicmd"
 
